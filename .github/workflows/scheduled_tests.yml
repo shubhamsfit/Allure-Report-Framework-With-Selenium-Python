@@ -1,4 +1,4 @@
-name: Run Selenium Tests and Send Allure Report Link
+name: Run Selenium Tests and Publish Allure Report
 
 on:
   push:
@@ -40,17 +40,15 @@ jobs:
         run: |
           allure generate allure-results --clean -o allure-report
 
-      - name: Zip Allure Report
-        run: |
-          zip -r allure-report.zip allure-report
-
-      - name: Upload Allure Report ZIP as Artifact
-        uses: actions/upload-artifact@v4
+      - name: Deploy Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: allure-report
-          path: allure-report.zip
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          publish_dir: ./allure-report
+          publish_branch: gh-pages
+          force_orphan: true
 
-      - name: Send Allure Report Email (link only)
+      - name: Send Email with GitHub Pages Link
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtppro.zoho.in
@@ -65,10 +63,10 @@ jobs:
 
             The scheduled test run has completed successfully.
 
-            ✅ The Allure report is available as an artifact here:
-            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ✅ You can view the Allure report here:
+            https://shubhamsfit.github.io/Allure-Report-Framework-With-Selenium-Python/
 
-            (Click the run, scroll to 'Artifacts', and download `allure-report.zip`)
+            (Hosted via GitHub Pages)
 
             Regards,  
             Selenium Bot
