@@ -1,12 +1,26 @@
 import pytest
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import allure
+import tempfile
+import shutil
 
 @pytest.fixture
 def driver():
-    driver = webdriver.Chrome()
+    options = Options()
+
+    # Create a temporary directory for user data
+    temp_profile_dir = tempfile.mkdtemp()
+    options.add_argument(f"--user-data-dir={temp_profile_dir}")
+
+    driver = webdriver.Chrome(options=options)
+
     yield driver
+
     driver.quit()
+
+    # Clean up temp directory after quitting the driver
+    shutil.rmtree(temp_profile_dir)
 
 # Screenshot on failure
 @pytest.hookimpl(hookwrapper=True)
