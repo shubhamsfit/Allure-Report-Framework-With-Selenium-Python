@@ -1,0 +1,66 @@
+name: Run Selenium Tests and Send Allure Report
+
+on:
+  schedule:
+    - cron: '0 9 * * 1-5'  # Runs at 09:00 AM UTC Monday through Friday
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest allure-pytest
+
+      - name: Install Allure CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jre
+          wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
+          tar -zxvf allure-2.24.0.tgz
+          sudo mv allure-2.24.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
+
+      - name: Run tests and generate results
+        run: |
+          pytest --alluredir=allure-results
+
+      - name: Generate Allure report
+        run: |
+          allure generate allure-results --clean -o allure-report
+
+      - name: Upload Allure report as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Send Allure Report via Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtppro.zoho.in
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🧪 Allure Test Report - ${{ github.run_id }}"
+          to: shubhamkohli2002@gmail.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+          body: |
+            Hello,
+
+            The scheduled test run has completed.
+            Please find the Allure report attached.
+
+            Regards,
+            Selenium Bot
+          attachments: allure-report/index.html
