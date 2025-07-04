@@ -2,7 +2,7 @@ name: Run Selenium Tests and Send Allure Report
 
 on:
   schedule:
-    - cron: '50 12 * * 1-5'  # 12:50 PM UTC (Mon–Fri)
+    - cron: '22 7 * * 1-5'  # Run at 12:52 PM IST Mon-Fri
 jobs:
   test:
     runs-on: ubuntu-latest
