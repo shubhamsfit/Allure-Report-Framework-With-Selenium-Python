@@ -4,12 +4,19 @@ from selenium.webdriver.chrome.options import Options
 import allure
 import tempfile
 import shutil
+import time
 
 @pytest.fixture
 def driver():
     options = Options()
 
-    # Create a temporary directory for user data
+    # Run Chrome in headless mode to avoid GUI and profile conflicts
+    options.add_argument("--headless=new")  # Use old "--headless" if this causes issues
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    # Use a temporary Chrome profile directory (optional but safer)
     temp_profile_dir = tempfile.mkdtemp()
     options.add_argument(f"--user-data-dir={temp_profile_dir}")
 
@@ -17,12 +24,12 @@ def driver():
 
     yield driver
 
+    # Clean up
     driver.quit()
+    time.sleep(2)  # Let Chrome processes fully exit
+    shutil.rmtree(temp_profile_dir, ignore_errors=True)
 
-    # Clean up temp directory after quitting the driver
-    shutil.rmtree(temp_profile_dir)
-
-# Screenshot on failure
+# Screenshot on failure for Allure report
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
