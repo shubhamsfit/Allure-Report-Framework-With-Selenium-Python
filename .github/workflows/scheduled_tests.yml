@@ -55,7 +55,7 @@ jobs:
       - name: Send Allure Report via Email
         uses: dawidd6/action-send-mail@v3
         with:
-            server_address: smtp.example.com
+            server_address: smtppro.zoho.in
             server_port: 465
             username: ${{ secrets.EMAIL_USERNAME }}
             password: ${{ secrets.EMAIL_PASSWORD }}
